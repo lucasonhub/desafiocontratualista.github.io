@@ -1,1 +1,1 @@
-# desafiocontratualista.io
+Jogo Didático sobre os filósofos modernos contratualistas

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio Contratualista</title>
+    <style>
+        :root {
+            --bg-color: #1e1e24;
+            --card-bg: #2b2b36;
+            --primary: #61afef;
+            --accent: #c678dd;
+            --text-main: #abb2bf;
+            --text-light: #ffffff;
+            --success: #98c379;
+            --danger: #e06c75;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            box-sizing: border-box;
+            border: 1px solid #3e3e4a;
+        }
+
+        h1, h2 {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"], select {
+            width: 80%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #3e3e4a;
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: #1e1e24;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #5294d1;
+            transform: translateY(-2px);
+        }
+
+        .option-btn {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 2px solid #3e3e4a;
+            text-align: left;
+            padding: 15px 20px;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background-color: #24242e;
+            color: var(--text-light);
+        }
+
+        .option-btn.correct {
+            background-color: rgba(152, 195, 121, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .option-btn.wrong {
+            background-color: rgba(224, 108, 117, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: var(--text-main);
+            border-bottom: 1px solid #3e3e4a;
+            padding-bottom: 10px;
+        }
+
+        .rank-title {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .rank-image {
+            font-size: 80px;
+            margin: 20px 0;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid var(--accent);
+        }
+
+        .submit-btn {
+            background-color: var(--accent);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #a862bd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="screen-start">
+        <h1>Desafio Contratualista</h1>
+        <p>Avaliação sobre as teorias de Hobbes, Locke e Rousseau. Identifique-se abaixo para iniciar. Sua nota será registrada ao final.</p>
+        
+        <input type="text" id="student-name" placeholder="Digite seu nome completo" required>
+        
+        <select id="student-class" required>
+            <option value="" disabled selected>Selecione sua turma...</option>
+            <option value="2E">2º Ano E</option>
+            <option value="2F">2º Ano F</option>
+            <option value="2G">2º Ano G</option>
+            <option value="2H">2º Ano H</option>
+        </select>
+
+        <button onclick="startGame()">Iniciar Avaliação</button>
+    </div>
+
+    <div class="container hidden" id="screen-quiz">
+        <div id="status-bar">
+            <span id="question-counter">Questão 1/10</span>
+            <span id="score-display">Pontos: 0</span>
+        </div>
+        <h2 id="question-text">Pergunta vai aqui?</h2>
+        <div id="options-container">
+            <!-- Opções geradas via JS -->
+        </div>
+        <button id="next-btn" class="hidden" onclick="nextQuestion()">Próxima Questão</button>
+    </div>
+
+    <div class="container hidden" id="screen-result">
+        <h1>Avaliação Concluída!</h1>
+        <p id="result-name"></p>
+        
+        <div id="result-image" class="rank-image">👑</div>
+        <div class="rank-title" id="result-rank">Mestre Contratualista</div>
+        <p id="result-desc"></p>
+        
+        <p>Sua pontuação final: <strong style="font-size: 24px; color: var(--success);" id="result-score">100</strong>/100</p>
+        
+        <p style="font-size: 14px; margin-top: 30px; border-top: 1px solid #3e3e4a; padding-top: 20px;">
+            Clique no botão abaixo para enviar sua nota oficialmente para o sistema do professor.
+        </p>
+        
+        <form action="https://formspree.io/f/xkjwdrwo" method="POST" id="score-form">
+            <input type="hidden" name="Aluno" id="form-aluno-nome">
+            <input type="hidden" name="Turma" id="form-aluno-turma">
+            <input type="hidden" name="Pontuacao" id="form-aluno-nota">
+            <button type="submit" class="submit-btn">Enviar Nota Oficial</button>
+        </form>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "Quem descreve o 'estado de natureza' como uma guerra de todos contra todos?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 0
+            },
+            {
+                q: "Para qual autor a preservação da propriedade privada (vida, liberdade e bens) é o motivo principal para a formação do Estado?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 1
+            },
+            {
+                q: "Quem defende que o contrato social deve ser guiado pela 'Vontade Geral' do povo e não por interesses particulares?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 2
+            },
+            {
+                q: "Qual autor defende a necessidade de um soberano absoluto (o Leviatã) para garantir a paz e a segurança da sociedade?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 0
+            },
+            {
+                q: "Quem argumenta que o homem nasce bom, mas a sociedade e a propriedade privada o corrompem (mito do Bom Selvagem)?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 2
+            },
+            {
+                q: "Quem afirma que o povo tem o direito de rebelião e pode destituir o governo se este não proteger os direitos naturais?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 1
+            },
+            {
+                q: "Qual filósofo concebe o estado de natureza não como uma guerra constante, mas como um estado de relativa paz onde falta apenas um juiz imparcial?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 1
+            },
+            {
+                q: "O célebre livro 'O Contrato Social', que propõe a soberania popular inalienável, foi escrito por qual destes pensadores?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 2
+            },
+            {
+                q: "A famosa frase 'O homem é o lobo do homem', usada para justificar a necessidade de um Estado forte que imponha a ordem, é associada a:",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 0
+            },
+            {
+                q: "Quem acredita que a desigualdade entre os homens surgiu no momento em que alguém cercou um pedaço de terra e disse 'isto é meu'?",
+                options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"],
+                answer: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let studentName = "";
+        let studentClass = "";
+        let answered = false;
+
+        function startGame() {
+            const nameInput = document.getElementById("student-name").value.trim();
+            const classSelect = document.getElementById("student-class").value;
+            
+            if (nameInput === "") {
+                alert("Por favor, digite seu nome para iniciar.");
+                return;
+            }
+            if (classSelect === "") {
+                alert("Por favor, selecione sua turma.");
+                return;
+            }
+            
+            studentName = nameInput;
+            studentClass = classSelect;
+            
+            document.getElementById("screen-start").classList.add("hidden");
+            document.getElementById("screen-quiz").classList.remove("hidden");
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            document.getElementById("next-btn").classList.add("hidden");
+            document.getElementById("question-counter").innerText = `Questão ${currentQuestion + 1}/${questions.length}`;
+            
+            const qData = questions[currentQuestion];
+            document.getElementById("question-text").innerText = qData.q;
+            
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return;
+            answered = true;
+            
+            const qData = questions[currentQuestion];
+            const allBtns = document.querySelectorAll(".option-btn");
+            
+            if (selectedIndex === qData.answer) {
+                btnElement.classList.add("correct");
+                score += 10;
+                document.getElementById("score-display").innerText = `Pontos: ${score}`;
+            } else {
+                btnElement.classList.add("wrong");
+                allBtns[qData.answer].classList.add("correct");
+            }
+            
+            allBtns.forEach(btn => btn.style.pointerEvents = "none");
+            document.getElementById("next-btn").classList.remove("hidden");
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById("screen-quiz").classList.add("hidden");
+            document.getElementById("screen-result").classList.remove("hidden");
+            
+            document.getElementById("result-name").innerText = `Aluno(a): ${studentName} (Turma: ${studentClass})`;
+            document.getElementById("result-score").innerText = score;
+            
+            let rank = "";
+            let rankImg = "";
+            let rankDesc = "";
+            
+            if (score >= 80) {
+                rank = "Soberano (Mestre Contratualista)";
+                rankImg = "👑"; // Coroa
+                rankDesc = "Excelente! Você domina as teorias do Estado e compreende perfeitamente a formação da sociedade civil.";
+                document.getElementById("result-image").style.borderColor = "#98c379"; // Verde
+            } else if (score >= 50) {
+                rank = "Cidadão Ativo";
+                rankImg = "📜"; // Pergaminho/Contrato
+                rankDesc = "Muito bom! Você assinou o contrato social, mas ainda pode revisar alguns direitos e deveres naturais.";
+                document.getElementById("result-image").style.borderColor = "#61afef"; // Azul
+            } else {
+                rank = "Habitante do Estado de Natureza";
+                rankImg = "🐺"; // Lobo
+                rankDesc = "Atenção! Você ainda vive na lei do mais forte. Cuidado para não virar o lobo do próprio homem, revise o conteúdo!";
+                document.getElementById("result-image").style.borderColor = "#e06c75"; // Vermelho
+            }
+            
+            document.getElementById("result-rank").innerText = rank;
+            document.getElementById("result-image").innerText = rankImg;
+            document.getElementById("result-desc").innerText = rankDesc;
+            
+            // Preencher os dados ocultos no formulário para envio
+            document.getElementById("form-aluno-nome").value = studentName;
+            document.getElementById("form-aluno-turma").value = studentClass;
+            document.getElementById("form-aluno-nota").value = score;
+        }
+    </script>
+</body>
+</html>

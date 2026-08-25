@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio Contratualista</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #1a1612;
+            --parchment: #f5edd6;
+            --parchment-mid: #e8d9b5;
+            --parchment-dark: #d4c08a;
+            --crimson: #8b1a1a;
+            --crimson-light: #b52828;
+            --gold: #b8860b;
+            --gold-light: #d4a520;
+            --text-body: #3d2b1f;
+            --text-muted: #7a6040;
+            --surface: #fffdf5;
+            --border: rgba(139, 90, 11, 0.25);
+
+            --green-fill: #2d6a4f;
+            --green-bg: #d8f3dc;
+            --red-fill: #8b1a1a;
+            --red-bg: #fde8e8;
+        }
+
+        html { min-height: 100%; background: var(--ink); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at 50% 0%, #2d2318 0%, var(--ink) 70%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .screen { display: none; width: 100%; max-width: 620px; }
+        .screen.active { display: block; }
+
+        /* ── Ornament top ── */
+        .ornament {
+            text-align: center;
+            margin-bottom: 24px;
+            opacity: 0.7;
+        }
+        .ornament svg { display: inline-block; }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            padding: 40px 48px 48px;
+            position: relative;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.08),
+                0 8px 24px rgba(0,0,0,0.18),
+                inset 0 0 0 1px rgba(255,255,255,0.6);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        /* ── Typography ── */
+        .eyebrow {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--ink);
+            text-align: center;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        /* ── Form fields ── */
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--parchment-dark);
+            border-radius: 3px;
+            background: var(--parchment);
+            color: var(--text-body);
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+            appearance: none;
+        }
+        input[type="text"]:focus, select:focus { border-color: var(--gold); }
+        select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6040' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+        .field-group { margin-bottom: 4px; }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--crimson);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+        .btn-primary:hover { background: var(--crimson-light); }
+        .btn-primary:active { transform: scale(0.99); }
+
+        .btn-submit {
+            background: var(--gold);
+        }
+        .btn-submit:hover { background: var(--gold-light); }
+
+        /* ── Status bar ── */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .status-bar span {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .status-bar .score-badge {
+            background: var(--parchment);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 14px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ── Progress bar ── */
+        .progress-track {
+            height: 3px;
+            background: var(--parchment-dark);
+            border-radius: 2px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Question ── */
+        #question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.4;
+            margin-bottom: 28px;
+        }
+
+        /* ── Options ── */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--parchment);
+            border: 1px solid var(--parchment-dark);
+            border-radius: 3px;
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: var(--text-body);
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 0.15s, background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--gold);
+            background: var(--parchment-mid);
+        }
+        .option-btn .option-marker {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1.5px solid var(--parchment-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .option-btn.correct {
+            background: var(--green-bg);
+            border-color: var(--green-fill);
+            color: var(--green-fill);
+        }
+        .option-btn.correct .option-marker {
+            background: var(--green-fill);
+            border-color: var(--green-fill);
+            color: #fff;
+        }
+        .option-btn.wrong {
+            background: var(--red-bg);
+            border-color: var(--red-fill);
+            color: var(--red-fill);
+        }
+        .option-btn.wrong .option-marker {
+            background: var(--red-fill);
+            border-color: var(--red-fill);
+            color: #fff;
+        }
+
+        /* ── Next button ── */
+        #next-btn {
+            margin-top: 24px;
+        }
+
+        /* ── Result screen ── */
+        .result-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .crest-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .rank-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .rank-subtitle {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rank-desc {
+            font-size: 15px;
+            line-height: 1.65;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0 8px;
+            margin-bottom: 28px;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 20px;
+            background: var(--parchment);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            margin-bottom: 28px;
+        }
+        .score-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .score-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .score-total {
+            font-size: 16px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .student-info {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .send-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0 20px;
+        }
+        .send-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* ── Rank colors ── */
+        .rank-sovereign .rank-name { color: var(--crimson); }
+        .rank-sovereign .rank-subtitle { color: var(--gold); }
+        .rank-citizen .rank-name { color: #1a4a6b; }
+        .rank-citizen .rank-subtitle { color: #2a6da0; }
+        .rank-nature .rank-name { color: #4a3a1a; }
+        .rank-nature .rank-subtitle { color: #7a5a20; }
+
+        @media (max-width: 520px) {
+            .card { padding: 28px 24px 36px; }
+            h1 { font-size: 26px; }
+            #question-text { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── TELA DE INÍCIO ── -->
+<div class="screen active" id="screen-start">
+    <div class="ornament">
+        <svg width="180" height="28" viewBox="0 0 180 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="14" x2="60" y2="14" stroke="#b8860b" stroke-width="0.5"/>
+            <path d="M70 14 L75 8 L80 14 L85 8 L90 14 L95 8 L100 14 L105 8 L110 14" stroke="#b8860b" stroke-width="0.8" fill="none"/>
+            <line x1="120" y1="14" x2="180" y2="14" stroke="#b8860b" stroke-width="0.5"/>
+            <circle cx="90" cy="14" r="2" fill="#b8860b"/>
+        </svg>
+    </div>
+    <div class="card">
+        <div class="eyebrow">Filosofia Política Moderna</div>
+        <h1>Desafio Contratualista</h1>
+        <p class="subtitle">Avaliação sobre Hobbes, Locke e Rousseau — os arquitetos do contrato social. Identifique-se para iniciar.</p>
+
+        <div class="field-group">
+            <label for="student-name">Nome completo</label>
+            <input type="text" id="student-name" placeholder="Digite seu nome completo">
+        </div>
+        <div class="field-group">
+            <label for="student-class">Turma</label>
+            <select id="student-class">
+                <option value="" disabled selected>Selecione sua turma…</option>
+                <option value="2E">2º Ano E</option>
+                <option value="2F">2º Ano F</option>
+                <option value="2G">2º Ano G</option>
+                <option value="2H">2º Ano H</option>
+            </select>
+        </div>
+
+        <button class="btn-primary" onclick="startGame()">Iniciar Avaliação</button>
+    </div>
+</div>
+
+<!-- ── TELA DO QUIZ ── -->
+<div class="screen" id="screen-quiz">
+    <div class="card">
+        <div class="status-bar">
+            <span id="question-counter">Questão 1 de 10</span>
+            <span class="score-badge" id="score-display">0 pts</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width: 10%"></div>
+        </div>
+        <h2 id="question-text">Pergunta vai aqui</h2>
+        <div class="options" id="options-container"></div>
+        <button class="btn-primary" id="next-btn" style="display:none" onclick="nextQuestion()">Próxima Questão →</button>
+    </div>
+</div>
+
+<!-- ── TELA DE RESULTADO ── -->
+<div class="screen" id="screen-result">
+    <div class="ornament">
+        <svg width="180" height="28" viewBox="0 0 180 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="14" x2="60" y2="14" stroke="#b8860b" stroke-width="0.5"/>
+            <path d="M70 14 L75 8 L80 14 L85 8 L90 14 L95 8 L100 14 L105 8 L110 14" stroke="#b8860b" stroke-width="0.8" fill="none"/>
+            <line x1="120" y1="14" x2="180" y2="14" stroke="#b8860b" stroke-width="0.5"/>
+            <circle cx="90" cy="14" r="2" fill="#b8860b"/>
+        </svg>
+    </div>
+    <div class="card" id="result-card">
+        <div class="eyebrow">Avaliação Concluída</div>
+        <h1>Resultado Final</h1>
+
+        <div class="crest-container">
+            <svg id="result-crest" width="140" height="160" viewBox="0 0 140 160"></svg>
+        </div>
+
+        <div class="rank-name" id="result-rank"></div>
+        <div class="rank-subtitle" id="result-subtitle"></div>
+        <p class="rank-desc" id="result-desc"></p>
+
+        <div class="score-display">
+            <div class="score-label">Pontuação obtida</div>
+            <div class="score-value" id="result-score">0<span class="score-total">/100</span></div>
+        </div>
+
+        <p class="student-info" id="result-student-info"></p>
+
+        <hr class="send-divider">
+        <p class="send-hint">Clique abaixo para enviar sua nota ao sistema do professor.</p>
+
+        <form action="https://formspree.io/f/xkjwdrwo" method="POST" id="score-form">
+            <input type="hidden" name="Aluno" id="form-aluno-nome">
+            <input type="hidden" name="Turma" id="form-aluno-turma">
+            <input type="hidden" name="Pontuacao" id="form-aluno-nota">
+            <button type="submit" class="btn-primary btn-submit">Enviar Nota Oficial</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const questions = [
+    { q: "Quem descreve o 'estado de natureza' como uma guerra de todos contra todos?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 0 },
+    { q: "Para qual autor a preservação da propriedade privada — vida, liberdade e bens — é o motivo principal para a formação do Estado?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 1 },
+    { q: "Quem defende que o contrato social deve ser guiado pela 'Vontade Geral' do povo e não por interesses particulares?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 2 },
+    { q: "Qual autor defende a necessidade de um soberano absoluto — o Leviatã — para garantir a paz e a segurança da sociedade?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 0 },
+    { q: "Quem argumenta que o homem nasce bom, mas a sociedade e a propriedade privada o corrompem?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 2 },
+    { q: "Quem afirma que o povo tem o direito de rebelião e pode destituir o governo se este não proteger os direitos naturais?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 1 },
+    { q: "Qual filósofo concebe o estado de natureza não como uma guerra constante, mas como um estado de relativa paz onde falta apenas um juiz imparcial?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 1 },
+    { q: "O célebre livro 'O Contrato Social', que propõe a soberania popular inalienável, foi escrito por qual destes pensadores?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 2 },
+    { q: "A expressão 'o homem é o lobo do homem', usada para justificar a necessidade de um Estado forte que imponha a ordem, é associada a:", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 0 },
+    { q: "Quem acredita que a desigualdade entre os homens surgiu no momento em que alguém cercou um pedaço de terra e disse 'isto é meu'?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau"], answer: 2 }
+];
+
+let currentQuestion = 0, score = 0, studentName = "", studentClass = "", answered = false;
+const labels = ["A", "B", "C"];
+
+function startGame() {
+    const name = document.getElementById("student-name").value.trim();
+    const cls = document.getElementById("student-class").value;
+    if (!name) { alert("Por favor, digite seu nome para iniciar."); return; }
+    if (!cls) { alert("Por favor, selecione sua turma."); return; }
+    studentName = name; studentClass = cls;
+    show("screen-quiz");
+    loadQuestion();
+}
+
+function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    window.scrollTo(0, 0);
+}
+
+function loadQuestion() {
+    answered = false;
+    document.getElementById("next-btn").style.display = "none";
+    document.getElementById("question-counter").textContent = `Questão ${currentQuestion + 1} de ${questions.length}`;
+    document.getElementById("score-display").textContent = `${score} pts`;
+    document.getElementById("progress-fill").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+    const q = questions[currentQuestion];
+    document.getElementById("question-text").textContent = q.q;
+
+    const container = document.getElementById("options-container");
+    container.innerHTML = "";
+    q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerHTML = `<span class="option-marker">${labels[i]}</span>${opt}`;
+        btn.onclick = () => checkAnswer(i, btn);
+        container.appendChild(btn);
+    });
+}
+
+function checkAnswer(idx, btn) {
+    if (answered) return;
+    answered = true;
+    const correct = questions[currentQuestion].answer;
+    const allBtns = document.querySelectorAll(".option-btn");
+    if (idx === correct) { btn.classList.add("correct"); score += 10; btn.querySelector(".option-marker").textContent = "✓"; }
+    else { btn.classList.add("wrong"); btn.querySelector(".option-marker").textContent = "✗"; allBtns[correct].classList.add("correct"); allBtns[correct].querySelector(".option-marker").textContent = "✓"; }
+    allBtns.forEach(b => { b.disabled = true; b.style.cursor = "default"; });
+    document.getElementById("score-display").textContent = `${score} pts`;
+    document.getElementById("next-btn").style.display = "block";
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) loadQuestion();
+    else showResult();
+}
+
+function showResult() {
+    show("screen-result");
+    document.getElementById("result-score").innerHTML = `${score}<span class="score-total">/100</span>`;
+    document.getElementById("result-student-info").textContent = `${studentName} · Turma ${studentClass}`;
+    document.getElementById("form-aluno-nome").value = studentName;
+    document.getElementById("form-aluno-turma").value = studentClass;
+    document.getElementById("form-aluno-nota").value = score;
+
+    const card = document.getElementById("result-card");
+    const crest = document.getElementById("result-crest");
+
+    if (score >= 80) {
+        card.classList.add("rank-sovereign");
+        document.getElementById("result-rank").textContent = "Soberano do Contrato";
+        document.getElementById("result-subtitle").textContent = "Mestre Contratualista";
+        document.getElementById("result-desc").textContent = "Excelente desempenho. Você demonstra domínio sólido sobre as distinções fundamentais entre Hobbes, Locke e Rousseau — e sobre os alicerces teóricos do Estado moderno.";
+        drawCrestSovereign(crest);
+    } else if (score >= 50) {
+        card.classList.add("rank-citizen");
+        document.getElementById("result-rank").textContent = "Cidadão Ativo";
+        document.getElementById("result-subtitle").textContent = "Signatário do Contrato Social";
+        document.getElementById("result-desc").textContent = "Bom resultado. Você compreende os fundamentos do contratualismo, mas ainda há espaço para aprofundar a diferenciação entre os pensadores e suas concepções de natureza humana.";
+        drawCrestCitizen(crest);
+    } else {
+        card.classList.add("rank-nature");
+        document.getElementById("result-rank").textContent = "Habitante do Estado de Natureza";
+        document.getElementById("result-subtitle").textContent = "Ainda fora do Pacto Social";
+        document.getElementById("result-desc").textContent = "É preciso retomar o conteúdo. As teorias de Hobbes, Locke e Rousseau apresentam diferenças essenciais sobre a natureza humana, a propriedade e a legitimidade do poder — revise-as com atenção.";
+        drawCrestNature(crest);
+    }
+}
+
+/* ── Desenho dos brasões SVG ── */
+
+function shieldPath() {
+    return "M70,12 L118,28 L118,88 Q118,140 70,155 Q22,140 22,88 L22,28 Z";
+}
+
+function drawCrestSovereign(svg) {
+    svg.innerHTML = `
+        <defs>
+            <clipPath id="cp-s"><path d="${shieldPath()}"/></clipPath>
+        </defs>
+        <path d="${shieldPath()}" fill="#f5edd6" stroke="#8b1a1a" stroke-width="2.5"/>
+        <path d="${shieldPath()}" fill="none" stroke="#d4a520" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+        <line x1="70" y1="20" x2="70" y2="148" stroke="#d4a520" stroke-width="0.8" opacity="0.3"/>
+        <line x1="28" y1="84" x2="112" y2="84" stroke="#d4a520" stroke-width="0.8" opacity="0.3"/>
+        <!-- Corona -->
+        <g fill="#b8860b">
+            <rect x="52" y="54" width="36" height="6" rx="1"/>
+            <rect x="52" y="54" width="6" height="18" rx="1"/>
+            <rect x="82" y="54" width="6" height="18" rx="1"/>
+            <rect x="64" y="48" width="12" height="6" rx="1"/>
+            <!-- pontas da coroa -->
+            <polygon points="52,54 55,44 58,54"/>
+            <polygon points="63,54 67,41 71,54"/>
+            <polygon points="82,54 85,44 88,54"/>
+            <!-- jewel -->
+            <circle cx="70" cy="60" r="4" fill="#8b1a1a"/>
+        </g>
+        <!-- Base scroll -->
+        <rect x="46" y="100" width="48" height="14" rx="2" fill="#d4a520" opacity="0.2" stroke="#d4a520" stroke-width="0.8"/>
+        <line x1="50" y1="107" x2="90" y2="107" stroke="#8b1a1a" stroke-width="0.8" opacity="0.5"/>
+        <!-- Stars -->
+        <g fill="#d4a520" opacity="0.6">
+            <polygon points="36,55 37.5,51 39,55 43,55 40,57.5 41,62 37.5,59.5 34,62 35,57.5 32,55"/>
+            <polygon points="101,55 102.5,51 104,55 108,55 105,57.5 106,62 102.5,59.5 99,62 100,57.5 97,55"/>
+        </g>
+        <!-- Laurel hints -->
+        <path d="M28,120 Q35,110 40,120" stroke="#8b1a1a" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M100,120 Q105,110 112,120" stroke="#8b1a1a" stroke-width="1" fill="none" opacity="0.4"/>
+        <!-- Outer frame -->
+        <path d="${shieldPath()}" fill="none" stroke="#8b1a1a" stroke-width="2.5"/>
+    `;
+}
+
+function drawCrestCitizen(svg) {
+    svg.innerHTML = `
+        <defs>
+            <clipPath id="cp-c"><path d="${shieldPath()}"/></clipPath>
+        </defs>
+        <path d="${shieldPath()}" fill="#edf4f9" stroke="#185fa5" stroke-width="2.5"/>
+        <path d="${shieldPath()}" fill="none" stroke="#378add" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+        <line x1="70" y1="20" x2="70" y2="148" stroke="#378add" stroke-width="0.8" opacity="0.25"/>
+        <line x1="28" y1="84" x2="112" y2="84" stroke="#378add" stroke-width="0.8" opacity="0.25"/>
+        <!-- Pergaminho -->
+        <rect x="48" y="46" width="44" height="56" rx="3" fill="#f5edd6" stroke="#b8860b" stroke-width="1.2"/>
+        <rect x="44" y="50" width="8" height="48" rx="3" fill="#e8d9b5" stroke="#b8860b" stroke-width="0.8"/>
+        <rect x="88" y="50" width="8" height="48" rx="3" fill="#e8d9b5" stroke="#b8860b" stroke-width="0.8"/>
+        <line x1="55" y1="62" x2="85" y2="62" stroke="#185fa5" stroke-width="1.2" opacity="0.5"/>
+        <line x1="55" y1="70" x2="85" y2="70" stroke="#185fa5" stroke-width="0.8" opacity="0.35"/>
+        <line x1="55" y1="77" x2="80" y2="77" stroke="#185fa5" stroke-width="0.8" opacity="0.35"/>
+        <line x1="55" y1="84" x2="83" y2="84" stroke="#185fa5" stroke-width="0.8" opacity="0.35"/>
+        <!-- Seal -->
+        <circle cx="70" cy="55" r="8" fill="#185fa5" opacity="0.15" stroke="#185fa5" stroke-width="1"/>
+        <text x="70" y="59" text-anchor="middle" font-size="10" fill="#185fa5" font-family="serif" font-style="italic">C</text>
+        <!-- Stars -->
+        <g fill="#378add" opacity="0.5">
+            <polygon points="36,55 37.5,51 39,55 43,55 40,57.5 41,62 37.5,59.5 34,62 35,57.5 32,55"/>
+            <polygon points="101,55 102.5,51 104,55 108,55 105,57.5 106,62 102.5,59.5 99,62 100,57.5 97,55"/>
+        </g>
+        <path d="${shieldPath()}" fill="none" stroke="#185fa5" stroke-width="2.5"/>
+    `;
+}
+
+function drawCrestNature(svg) {
+    svg.innerHTML = `
+        <defs>
+            <clipPath id="cp-n"><path d="${shieldPath()}"/></clipPath>
+        </defs>
+        <path d="${shieldPath()}" fill="#f5f0e8" stroke="#5c4a1e" stroke-width="2.5"/>
+        <path d="${shieldPath()}" fill="none" stroke="#b8860b" stroke-width="1" stroke-dasharray="3 3" opacity="0.35"/>
+        <line x1="70" y1="20" x2="70" y2="148" stroke="#b8860b" stroke-width="0.8" opacity="0.2"/>
+        <line x1="28" y1="84" x2="112" y2="84" stroke="#b8860b" stroke-width="0.8" opacity="0.2"/>
+        <!-- Lobo estilizado -->
+        <g fill="#5c4a1e" opacity="0.9">
+            <!-- corpo -->
+            <ellipse cx="70" cy="100" rx="22" ry="15" fill="#5c4a1e"/>
+            <!-- cabeça -->
+            <ellipse cx="70" cy="78" rx="16" ry="14" fill="#5c4a1e"/>
+            <!-- focinho -->
+            <ellipse cx="70" cy="87" rx="10" ry="7" fill="#7a6040"/>
+            <!-- orelhas -->
+            <polygon points="56,68 60,55 66,70"/>
+            <polygon points="84,68 80,55 74,70"/>
+            <!-- olhos -->
+            <circle cx="64" cy="76" r="3" fill="#f5f0e8"/>
+            <circle cx="64" cy="76" r="1.5" fill="#3d2b1f"/>
+            <circle cx="76" cy="76" r="3" fill="#f5f0e8"/>
+            <circle cx="76" cy="76" r="1.5" fill="#3d2b1f"/>
+            <!-- nariz -->
+            <ellipse cx="70" cy="85" rx="3" ry="2" fill="#3d2b1f"/>
+            <!-- patas -->
+            <rect x="52" y="112" width="10" height="8" rx="3" fill="#5c4a1e"/>
+            <rect x="78" y="112" width="10" height="8" rx="3" fill="#5c4a1e"/>
+            <!-- rabo -->
+            <path d="M92,105 Q110,95 105,115" stroke="#5c4a1e" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- texture lines over wolf -->
+        <path d="${shieldPath()}" fill="none" stroke="#5c4a1e" stroke-width="2.5"/>
+    `;
+}
+</script>
+</body>
+</html>
